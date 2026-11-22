@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lieferoo Rider - 배달 상세 정보</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-container">
+    <div class="header">
+      <span class="brand" style="color:#1D4ED8;">Lieferoo 라이더</span>
+      <span class="page-title">5. Rider Order Detail</span>
+    </div>
+    <div class="content">
+      <div class="rider-card">
+        <div class="rider-header" id="rOrderNo">주문 번호</div>
+        <div style="border-bottom: 1px solid #E5E7EB; padding-bottom: 12px; margin-bottom: 12px;">
+          <div class="label" style="color:#6B7280; font-size:12px;">배달지 주소 (도로명)</div>
+          <div class="rider-detail" id="rRoadKo" style="color:#1D4ED8; font-size:16px;"></div>
+          <div class="original-text" id="rRoadEn"></div>
+        </div>
+        <div style="border-bottom: 1px solid #E5E7EB; padding-bottom: 12px; margin-bottom: 12px;">
+          <div class="label" style="color:#6B7280; font-size:12px;">상세 주소 (동 / 호수)</div>
+          <div class="rider-detail" id="rBuildingKo"></div>
+          <div class="original-text" id="rBuildingEn"></div>
+        </div>
+        <div>
+          <div class="label" style="color:#6B7280; font-size:12px;">라이더 요청사항</div>
+          <div id="requestContainer"></div>
+        </div>
+      </div>
+      <div id="statusCard" class="card" style="text-align:center;">
+        <div style="font-size:14px; font-weight:600; color:#00805A;">배달 진행 중</div>
+      </div>
+      <button id="completeBtn" class="btn btn-primary">배달 완료 처리</button>
+      <a href="index.html" class="btn btn-secondary">새 주문 테스트 돌아가기</a>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    const order = getOrderState();
+    if (!order) {
+      document.querySelector('.content').innerHTML = '<div class="card empty-state">주문 정보가 없습니다. index.html에서 주문을 먼저 진행해주세요.</div>';
+    } else {
+      document.getElementById('rOrderNo').innerText = '주문번호: ' + (order.order_id || 'ORD-20261122');
+      document.getElementById('rRoadKo').innerText = order.road_address_ko || order.road_address_en;
+      document.getElementById('rRoadEn').innerText = '원문: ' + order.road_address_en;
+
+      const bKo = (order.building_name_ko ? order.building_name_ko + ' ' : '') + (order.unit_ko || '');
+      const bEn = (order.building_name_en ? order.building_name_en + ' ' : '') + (order.unit_en || '');
+      document.getElementById('rBuildingKo').innerText = bKo || bEn;
+      document.getElementById('rBuildingEn').innerText = '원문: ' + bEn;
+
+      const reqContainer = document.getElementById('requestContainer');
+      if (!order.is_custom && order.rider_request_ko) {
+        reqContainer.innerHTML = `
+          <div class="box-translated">
+            <span class="badge badge-blue">한국어 자동 번역 완료</span>
+            <div style="font-weight:700; color:#1E40AF;">${order.rider_request_ko}</div>
+            <div class="original-text">고객 원문: ${order.rider_request_en}</div>
+          </div>
+        `;
+      } else {
+        reqContainer.innerHTML = `
+          <div class="box-fallback">
+            <span class="badge badge-amber">번역 불가 (고객 원문 표시)</span>
+            <div style="font-weight:700; color:#92400E;">${order.rider_request_en}</div>
+            <div class="original-text">* 자동 번역할 수 없는 구문으로 고객 입력 원문 그대로 전달되었습니다.</div>
+          </div>
+        `;
+      }
+
+      document.getElementById('completeBtn').addEventListener('click', () => {
+        document.getElementById('statusCard').innerHTML = '<div style="font-size:16px; font-weight:700; color:#00805A;">🎉 배달이 완료되었습니다!</div>';
+      });
+    }
+  </script>
+</body>
+</html>
