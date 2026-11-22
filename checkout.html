@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lieferoo - Checkout &amp; Requests</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-container">
+    <div class="header">
+      <a href="details.html" class="brand">Lieferoo</a>
+      <span class="page-title">3. Checkout</span>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="label">Delivery Address</div>
+        <div id="addrSummary" style="margin-top:4px; font-weight:600;"></div>
+        <div id="unitSummary" style="font-size:13px; color:#4B5563; margin-top:2px;"></div>
+      </div>
+      <div class="card">
+        <div class="input-group">
+          <label class="label" for="presetSelect">Rider Request (Auto-translated to Korean)</label>
+          <select id="presetSelect" class="select-field">
+            <option value="Leave at door and ring doorbell">Leave at door and ring doorbell</option>
+            <option value="Leave with security / guard">Leave with security / guard</option>
+            <option value="Hand it to me directly">Hand it to me directly</option>
+            <option value="Don't ring the bell, knock lightly">Don't ring the bell, knock lightly</option>
+            <option value="CUSTOM">Custom request (Untranslated fallback test)</option>
+          </select>
+        </div>
+        <div class="input-group" id="customBox" style="display:none; margin-top:12px;">
+          <label class="label" for="customInput">Custom Request in English</label>
+          <input type="text" id="customInput" class="input-field" placeholder="e.g. Please call me when you reach the gate">
+        </div>
+      </div>
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; font-weight:700;">
+          <span>Total Amount</span>
+          <span>₩18,500</span>
+        </div>
+      </div>
+      <button id="placeOrderBtn" class="btn btn-primary">Place Order</button>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    const order = getOrderState();
+    if (!order || !order.unit_en) window.location.href = 'details.html';
+
+    document.getElementById('addrSummary').innerText = order.road_address_en;
+    document.getElementById('unitSummary').innerText = `${order.building_name_en} ${order.unit_en}`;
+
+    const presetSelect = document.getElementById('presetSelect');
+    const customBox = document.getElementById('customBox');
+    const customInput = document.getElementById('customInput');
+
+    presetSelect.addEventListener('change', () => {
+      customBox.style.display = presetSelect.value === 'CUSTOM' ? 'block' : 'none';
+    });
+
+    document.getElementById('placeOrderBtn').addEventListener('click', () => {
+      const isCustom = presetSelect.value === 'CUSTOM';
+      const reqEn = isCustom ? (customInput.value.trim() || 'Please call me when you reach the gate') : presetSelect.value;
+      const reqKo = isCustom ? null : (PRESET_TRANSLATIONS[reqEn] || null);
+
+      saveOrderState({
+        rider_request_en: reqEn,
+        rider_request_ko: reqKo,
+        is_custom: isCustom,
+        order_id: 'ORD-' + Math.floor(100000 + Math.random() * 900000)
+      });
+      window.location.href = 'confirmation.html';
+    });
+  </script>
+</body>
+</html>
