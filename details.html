@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lieferoo - Address Details</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-container">
+    <div class="header">
+      <a href="index.html" class="brand">Lieferoo</a>
+      <span class="page-title">2. Address Details</span>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="label">Selected Address</div>
+        <div id="selectedAddrDisplay" style="margin-top:6px; font-weight:600; color:#00805A;"></div>
+      </div>
+      <div class="card">
+        <div class="input-group">
+          <label class="label" for="unitInput">Building / Room / Unit Details *</label>
+          <input type="text" id="unitInput" class="input-field" placeholder="e.g. Bldg 101 Rm 402">
+          <div id="unitError" class="error-text">Please enter building and room numbers.</div>
+        </div>
+        <button id="nextBtn" class="btn btn-primary" style="margin-top:16px;">Continue to Checkout</button>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    const order = getOrderState();
+    if (!order || !order.road_address_en) {
+      window.location.href = 'index.html';
+    }
+    document.getElementById('selectedAddrDisplay').innerText = order.building_name_en 
+      ? `${order.building_name_en}, ${order.road_address_en}` 
+      : order.road_address_en;
+
+    const unitInput = document.getElementById('unitInput');
+    const unitError = document.getElementById('unitError');
+
+    document.getElementById('nextBtn').addEventListener('click', () => {
+      const val = unitInput.value.trim();
+      if (!val) {
+        unitInput.classList.add('input-error');
+        unitError.style.display = 'block';
+        return;
+      }
+      // Auto-translate simple Bldg X Rm Y format to Korean동/호 or preserve format
+      let unitKo = val;
+      const match = val.match(/(?:Bldg\s*(\d+))?\s*(?:Rm\s*(\d+))?/i);
+      if (match && (match[1] || match[2])) {
+        const bldg = match[1] ? `${match[1]}동 ` : '';
+        const rm = match[2] ? `${match[2]}호` : '';
+        unitKo = `${bldg}${rm}`.trim();
+      }
+      saveOrderState({ unit_en: val, unit_ko: unitKo });
+      window.location.href = 'checkout.html';
+    });
+  </script>
+</body>
+</html>
