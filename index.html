@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lieferoo - Address Search</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-container">
+    <div class="header">
+      <span class="brand">Lieferoo</span>
+      <span class="page-title">1. Address Search</span>
+    </div>
+    <div class="content">
+      <div class="card">
+        <div class="input-group">
+          <label class="label" for="searchInput">Search Delivery Address (English)</label>
+          <input type="text" id="searchInput" class="input-field" placeholder="e.g. Donggyo-ro or Hanbit">
+          <div id="errorText" class="error-text">Special characters are not allowed.</div>
+        </div>
+      </div>
+      <div class="card" id="resultsCard">
+        <div class="label" style="margin-bottom:8px;">Recent &amp; Suggested Addresses</div>
+        <div id="addressList"></div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    let addresses = [];
+    const searchInput = document.getElementById('searchInput');
+    const addressList = document.getElementById('addressList');
+    const errorText = document.getElementById('errorText');
+
+    function renderList(items) {
+      if (!items || items.length === 0) {
+        addressList.innerHTML = '<div class="empty-state">No matching address found. Try "Donggyo-ro".</div>';
+        return;
+      }
+      addressList.innerHTML = items.map(a => `
+        <div class="address-item" onclick="selectAddress('${a.address_id}')">
+          <div class="address-title">${a.building_name_en || a.road_address_en}</div>
+          <div class="address-sub">${a.road_address_en}</div>
+        </div>
+      `).join('');
+    }
+
+    function selectAddress(id) {
+      const selected = addresses.find(a => a.address_id === id);
+      if (selected) {
+        saveOrderState({
+          address_id: selected.address_id,
+          road_address_en: selected.road_address_en,
+          road_address_ko: selected.road_address_ko,
+          building_name_en: selected.building_name_en || '',
+          building_name_ko: selected.building_name_ko || ''
+        });
+        window.location.href = 'details.html';
+      }
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      if (/[<>{}]/.test(val)) {
+        searchInput.classList.add('input-error');
+        errorText.style.display = 'block';
+        return;
+      } else {
+        searchInput.classList.remove('input-error');
+        errorText.style.display = 'none';
+      }
+
+      if (!val) {
+        renderList(addresses);
+        return;
+      }
+      const filtered = addresses.filter(a => 
+        (a.road_address_en && a.road_address_en.toLowerCase().includes(val.toLowerCase())) ||
+        (a.building_name_en && a.building_name_en.toLowerCase().includes(val.toLowerCase()))
+      );
+      renderList(filtered);
+    });
+
+    loadAddresses().then(data => {
+      addresses = data;
+      renderList(addresses);
+    });
+  </script>
+</body>
+</html>
