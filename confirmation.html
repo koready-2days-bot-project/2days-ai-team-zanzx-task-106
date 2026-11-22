@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lieferoo - Order Placed</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="mobile-container">
+    <div class="header">
+      <span class="brand">Lieferoo</span>
+      <span class="page-title">4. Order Confirmation</span>
+    </div>
+    <div class="content">
+      <div class="card" style="text-align:center; padding:24px 16px;">
+        <div style="font-size:32px;">✅</div>
+        <div style="font-size:18px; font-weight:700; color:#00805A; margin-top:8px;">Order Received!</div>
+        <div id="orderIdText" style="font-size:12px; color:#6B7280; margin-top:4px;"></div>
+      </div>
+      <div class="card">
+        <div class="label">Rider Screen Translation Preview</div>
+        <div style="font-size:12px; color:#4B5563; margin-top:4px;">Your address and requests are connected directly to the Korean rider view below.</div>
+      </div>
+      <a href="rider.html" class="btn btn-primary">Open Rider Screen (Korean View)</a>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>
+    const order = getOrderState();
+    if (!order || !order.order_id) window.location.href = 'index.html';
+    document.getElementById('orderIdText').innerText = 'Order ID: ' + order.order_id;
+  </script>
+</body>
+</html>
